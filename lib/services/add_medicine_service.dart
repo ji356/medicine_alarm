@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class AddMedicineService with ChangeNotifier {
-  final _alarms = <String>{
+  final _alarms = <String>[
     '08:00',
     '13:00',
     '19:00',
-  };
+  ];
 
-  Set<String> get alarms => _alarms;
+  List<String> get alarms => _alarms;
 
   void addNowAlarm() {
     final now = DateTime.now();

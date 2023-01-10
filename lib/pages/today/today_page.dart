@@ -1,17 +1,18 @@
+import 'dart:io';
+
 import 'package:drug_alarm/components/drug_constants.dart';
+import 'package:drug_alarm/components/drug_page_route.dart';
+import 'package:drug_alarm/main.dart';
+import 'package:drug_alarm/models/medicine_alarm.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+
+import '../../models/medicine.dart';
+import 'today_empty_widget.dart';
 
 class TodayPage extends StatelessWidget {
-  TodayPage({super.key});
-
-  final list = [
-    '약',
-    '약이름',
-    '조금긴약이름',
-    '기이이이이이이인약이름',
-    '이십글자에맞춘길고길고길고길고긴야약이름',
-  ];
+  const TodayPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,13 +24,40 @@ class TodayPage extends StatelessWidget {
           style: Theme.of(context).textTheme.headline4,
         ),
         const SizedBox(height: regularSpace),
-        const Divider(height: 1, thickness: 2.0),
+        Expanded(
+          child: ValueListenableBuilder(
+            valueListenable: medicineRepository.medicineBox.listenable(),
+            builder: _builderMedicineListView,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _builderMedicineListView(context, Box<Medicine> box, _) {
+    final medicines = box.values.toList();
+    final medicineAlarms = <MedicineAlarm>[];
+
+    if (medicines.isEmpty) {
+      return const TodayEmpty();
+    }
+
+    for (var medicine in medicines) {
+      for (var alarm in medicine.alarms) {
+        medicineAlarms.add(MedicineAlarm(medicine.id, medicine.name,
+            medicine.imagePath, alarm, medicine.key));
+      }
+    }
+
+    return Column(
+      children: [
+        const Divider(height: 1, thickness: 1.0),
         Expanded(
           child: ListView.separated(
             padding: const EdgeInsets.symmetric(vertical: smallSpace),
-            itemCount: list.length,
+            itemCount: medicineAlarms.length,
             itemBuilder: (BuildContext context, int index) {
-              return MedicineListTile(name: list[index]);
+              return MedicineListTile(medicineAlaram: medicineAlarms[index]);
             },
             separatorBuilder: (BuildContext context, int index) {
               return const Divider(
@@ -38,7 +66,7 @@ class TodayPage extends StatelessWidget {
             },
           ),
         ),
-        const Divider(height: 1, thickness: 2.0),
+        const Divider(height: 1, thickness: 1.0),
       ],
     );
   }
@@ -47,10 +75,10 @@ class TodayPage extends StatelessWidget {
 class MedicineListTile extends StatelessWidget {
   const MedicineListTile({
     Key? key,
-    required this.name,
+    required this.medicineAlaram,
   }) : super(key: key);
 
-  final String name;
+  final MedicineAlarm medicineAlaram;
 
   @override
   Widget build(BuildContext context) {
@@ -60,9 +88,20 @@ class MedicineListTile extends StatelessWidget {
       children: [
         CupertinoButton(
           padding: EdgeInsets.zero,
-          onPressed: () {},
-          child: const CircleAvatar(
+          onPressed: medicineAlaram.imagePath == null
+              ? null
+              : () {
+                  Navigator.push(
+                      context,
+                      FadePageRoute(
+                          page:
+                              ImageDetailPage(medicineAlaram: medicineAlaram)));
+                },
+          child: CircleAvatar(
             radius: 40,
+            foregroundImage: medicineAlaram.imagePath == null
+                ? null
+                : FileImage(File(medicineAlaram.imagePath!)),
           ),
         ),
         const SizedBox(width: smallSpace),
@@ -70,12 +109,12 @@ class MedicineListTile extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('🕑 08:30', style: textStyle),
+              Text('🕑 ${medicineAlaram.alarmTime}', style: textStyle),
               const SizedBox(height: 6),
               Wrap(
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  Text('$name,', style: textStyle),
+                  Text('${medicineAlaram.name},', style: textStyle),
                   TileActionButton(onTap: () {}, title: '지금'),
                   Text('|', style: textStyle),
                   TileActionButton(onTap: () {}, title: '아까'),
@@ -86,10 +125,29 @@ class MedicineListTile extends StatelessWidget {
           ),
         ),
         CupertinoButton(
-          onPressed: () {},
+          onPressed: () {
+            medicineRepository.deleteMedicine(medicineAlaram.key);
+          },
           child: const Icon(CupertinoIcons.ellipsis_vertical),
         ),
       ],
+    );
+  }
+}
+
+class ImageDetailPage extends StatelessWidget {
+  const ImageDetailPage({
+    Key? key,
+    required this.medicineAlaram,
+  }) : super(key: key);
+
+  final MedicineAlarm medicineAlaram;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(leading: const CloseButton()),
+      body: Center(child: Image.file(File(medicineAlaram.imagePath!))),
     );
   }
 }
