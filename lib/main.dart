@@ -1,13 +1,16 @@
-import 'package:drug_alarm/components/drug_themes.dart';
-import 'package:drug_alarm/pages/home_page.dart';
-import 'package:drug_alarm/repositories/drug_hive.dart';
-import 'package:drug_alarm/repositories/medicine_repository.dart';
-import 'package:drug_alarm/services/drug_notification_service.dart';
+import 'components/drug_themes.dart';
+import 'pages/home_page.dart';
+import 'repositories/drug_hive.dart';
+import 'repositories/medicine_history_repository.dart';
+import 'repositories/medicine_repository.dart';
+import 'services/drug_notification_service.dart';
+
 import 'package:flutter/material.dart';
 
 final notification = DrugNotificationService();
 final hive = DrugHive();
 final medicineRepository = MedicineRepository();
+final historyRepository = MedicineHistoryRepository();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

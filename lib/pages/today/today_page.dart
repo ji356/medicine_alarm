@@ -4,6 +4,8 @@ import 'package:drug_alarm/components/drug_constants.dart';
 import 'package:drug_alarm/components/drug_page_route.dart';
 import 'package:drug_alarm/main.dart';
 import 'package:drug_alarm/models/medicine_alarm.dart';
+import 'package:drug_alarm/models/medicine_history.dart';
+import 'package:drug_alarm/pages/bottomsheet/time_setting_bottomsheet.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -117,7 +119,25 @@ class MedicineListTile extends StatelessWidget {
                   Text('${medicineAlaram.name},', style: textStyle),
                   TileActionButton(onTap: () {}, title: '지금'),
                   Text('|', style: textStyle),
-                  TileActionButton(onTap: () {}, title: '아까'),
+                  TileActionButton(
+                      onTap: () {
+                        showModalBottomSheet(
+                                context: context,
+                                builder: ((context) => TimeSettingBottomSheet(
+                                    initialTime: medicineAlaram.alarmTime)))
+                            .then((takeDateTime) {
+                          if (takeDateTime == null ||
+                              takeDateTime is! DateTime) {
+                            return;
+                          }
+
+                          historyRepository.addHistory(MedicineHistory(
+                              medicineId: medicineAlaram.id,
+                              alarmTime: medicineAlaram.alarmTime,
+                              takeTime: takeDateTime));
+                        });
+                      },
+                      title: '아까'),
                   Text('먹었어요!', style: textStyle),
                 ],
               )
