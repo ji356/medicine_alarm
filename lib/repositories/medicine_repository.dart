@@ -1,6 +1,6 @@
 import 'dart:developer';
 
-import 'package:drug_alarm/repositories/drug_hive.dart';
+import 'drug_hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import '../models/medicine.dart';

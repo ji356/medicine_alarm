@@ -17,7 +17,15 @@ class TimeSettingBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final initDateTime = DateFormat('HH:mm').parse(initialTime);
+    final initTimeData = DateFormat('HH:mm').parse(initialTime);
+    final now = DateTime.now();
+    final initDateTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      initTimeData.hour,
+      initTimeData.minute,
+    );
     DateTime setDateTime = initDateTime;
 
     return BottomSheetBody(

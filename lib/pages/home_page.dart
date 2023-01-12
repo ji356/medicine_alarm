@@ -1,8 +1,8 @@
-import 'package:drug_alarm/components/drug_colors.dart';
-import 'package:drug_alarm/components/drug_constants.dart';
-import 'package:drug_alarm/pages/add_medicine/add_medicine_page.dart';
-import 'package:drug_alarm/pages/history/history_page.dart';
-import 'package:drug_alarm/pages/today/today_page.dart';
+import '../components/drug_colors.dart';
+import '../components/drug_constants.dart';
+import 'add_medicine/add_medicine_page.dart';
+import 'history/history_page.dart';
+import 'today/today_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 

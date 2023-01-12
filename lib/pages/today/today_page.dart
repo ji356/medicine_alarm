@@ -1,17 +1,14 @@
-import 'dart:io';
-
-import 'package:drug_alarm/components/drug_constants.dart';
-import 'package:drug_alarm/components/drug_page_route.dart';
-import 'package:drug_alarm/main.dart';
-import 'package:drug_alarm/models/medicine_alarm.dart';
 import 'package:drug_alarm/models/medicine_history.dart';
-import 'package:drug_alarm/pages/bottomsheet/time_setting_bottomsheet.dart';
-import 'package:flutter/cupertino.dart';
+
+import '../../components/drug_constants.dart';
+import '../../main.dart';
+import '../../models/medicine_alarm.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../models/medicine.dart';
 import 'today_empty_widget.dart';
+import 'today_take_tile.dart';
 
 class TodayPage extends StatelessWidget {
   const TodayPage({super.key});
@@ -59,7 +56,7 @@ class TodayPage extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: smallSpace),
             itemCount: medicineAlarms.length,
             itemBuilder: (BuildContext context, int index) {
-              return MedicineListTile(medicineAlaram: medicineAlarms[index]);
+              return _buildListTile(medicineAlarms[index]);
             },
             separatorBuilder: (BuildContext context, int index) {
               return const Divider(
@@ -72,132 +69,40 @@ class TodayPage extends StatelessWidget {
       ],
     );
   }
-}
 
-class MedicineListTile extends StatelessWidget {
-  const MedicineListTile({
-    Key? key,
-    required this.medicineAlaram,
-  }) : super(key: key);
+  Widget _buildListTile(MedicineAlarm medicineAlaram) {
+    return ValueListenableBuilder(
+      valueListenable: historyRepository.historyBox.listenable(),
+      builder: (context, Box<MedicineHistory> historyBox, _) {
+        if (historyBox.values.isEmpty) {
+          return BeforeTakeTile(medicineAlaram: medicineAlaram);
+        }
 
-  final MedicineAlarm medicineAlaram;
-
-  @override
-  Widget build(BuildContext context) {
-    final textStyle = Theme.of(context).textTheme.bodyText2;
-
-    return Row(
-      children: [
-        CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: medicineAlaram.imagePath == null
-              ? null
-              : () {
-                  Navigator.push(
-                      context,
-                      FadePageRoute(
-                          page:
-                              ImageDetailPage(medicineAlaram: medicineAlaram)));
-                },
-          child: CircleAvatar(
-            radius: 40,
-            foregroundImage: medicineAlaram.imagePath == null
-                ? null
-                : FileImage(File(medicineAlaram.imagePath!)),
+        final todayTakeHistory = historyBox.values.singleWhere(
+          (history) =>
+              history.medicineId == medicineAlaram.id &&
+              history.alarmTime == medicineAlaram.alarmTime &&
+              isToday(history.takeTime, DateTime.now()),
+          orElse: () => MedicineHistory(
+            medicineId: -1,
+            alarmTime: '',
+            takeTime: DateTime.now(),
           ),
-        ),
-        const SizedBox(width: smallSpace),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('🕑 ${medicineAlaram.alarmTime}', style: textStyle),
-              const SizedBox(height: 6),
-              Wrap(
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  Text('${medicineAlaram.name},', style: textStyle),
-                  TileActionButton(onTap: () {}, title: '지금'),
-                  Text('|', style: textStyle),
-                  TileActionButton(
-                      onTap: () {
-                        showModalBottomSheet(
-                                context: context,
-                                builder: ((context) => TimeSettingBottomSheet(
-                                    initialTime: medicineAlaram.alarmTime)))
-                            .then((takeDateTime) {
-                          if (takeDateTime == null ||
-                              takeDateTime is! DateTime) {
-                            return;
-                          }
+        );
 
-                          historyRepository.addHistory(MedicineHistory(
-                              medicineId: medicineAlaram.id,
-                              alarmTime: medicineAlaram.alarmTime,
-                              takeTime: takeDateTime));
-                        });
-                      },
-                      title: '아까'),
-                  Text('먹었어요!', style: textStyle),
-                ],
-              )
-            ],
-          ),
-        ),
-        CupertinoButton(
-          onPressed: () {
-            medicineRepository.deleteMedicine(medicineAlaram.key);
-          },
-          child: const Icon(CupertinoIcons.ellipsis_vertical),
-        ),
-      ],
+        if (todayTakeHistory.medicineId == -1 &&
+            todayTakeHistory.alarmTime == '') {
+          return BeforeTakeTile(medicineAlaram: medicineAlaram);
+        }
+
+        return AfterTakeTile(medicineAlaram: medicineAlaram);
+      },
     );
   }
 }
 
-class ImageDetailPage extends StatelessWidget {
-  const ImageDetailPage({
-    Key? key,
-    required this.medicineAlaram,
-  }) : super(key: key);
-
-  final MedicineAlarm medicineAlaram;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(leading: const CloseButton()),
-      body: Center(child: Image.file(File(medicineAlaram.imagePath!))),
-    );
-  }
-}
-
-class TileActionButton extends StatelessWidget {
-  const TileActionButton({
-    Key? key,
-    required this.title,
-    required this.onTap,
-  }) : super(key: key);
-
-  final String title;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final buttonTextStyle = Theme.of(context)
-        .textTheme
-        .bodyText2
-        ?.copyWith(fontWeight: FontWeight.w800);
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Text(
-          title,
-          style: buttonTextStyle,
-        ),
-      ),
-    );
-  }
+bool isToday(DateTime source, DateTime destiantion) {
+  return source.year == destiantion.year &&
+      source.month == destiantion.month &&
+      source.day == destiantion.day;
 }
