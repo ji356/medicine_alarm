@@ -95,7 +95,10 @@ class TodayPage extends StatelessWidget {
           return BeforeTakeTile(medicineAlaram: medicineAlaram);
         }
 
-        return AfterTakeTile(medicineAlaram: medicineAlaram);
+        return AfterTakeTile(
+          medicineAlaram: medicineAlaram,
+          history: todayTakeHistory,
+        );
       },
     );
   }
