@@ -1,3 +1,5 @@
+import 'package:intl/date_symbol_data_local.dart';
+
 import 'components/drug_themes.dart';
 import 'pages/home_page.dart';
 import 'repositories/drug_hive.dart';
@@ -14,6 +16,8 @@ final historyRepository = MedicineHistoryRepository();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await initializeDateFormatting();
 
   await notification.initializeTimeZone();
   await notification.initializeNotification();

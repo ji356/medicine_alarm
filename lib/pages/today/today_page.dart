@@ -81,12 +81,14 @@ class TodayPage extends StatelessWidget {
         final todayTakeHistory = historyBox.values.singleWhere(
           (history) =>
               history.medicineId == medicineAlaram.id &&
+              history.medicineKey == medicineAlaram.key &&
               history.alarmTime == medicineAlaram.alarmTime &&
               isToday(history.takeTime, DateTime.now()),
           orElse: () => MedicineHistory(
             medicineId: -1,
             alarmTime: '',
             takeTime: DateTime.now(),
+            medicineKey: -1,
           ),
         );
 

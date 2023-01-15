@@ -26,7 +26,7 @@ class BeforeTakeTile extends StatelessWidget {
 
     return Row(
       children: [
-        _MedicineImageButton(medicineAlaram: medicineAlaram),
+        MedicineImageButton(imagePath: medicineAlaram.imagePath),
         const SizedBox(width: smallSpace),
         Expanded(
           child: Column(
@@ -52,7 +52,8 @@ class BeforeTakeTile extends StatelessWidget {
                 historyRepository.addHistory(MedicineHistory(
                     medicineId: medicineAlaram.id,
                     alarmTime: medicineAlaram.alarmTime,
-                    takeTime: DateTime.now()));
+                    takeTime: DateTime.now(),
+                    medicineKey: medicineAlaram.key));
               },
               title: '지금'),
           Text('|', style: textStyle),
@@ -76,7 +77,8 @@ class BeforeTakeTile extends StatelessWidget {
       historyRepository.addHistory(MedicineHistory(
           medicineId: medicineAlaram.id,
           alarmTime: medicineAlaram.alarmTime,
-          takeTime: takeDateTime));
+          takeTime: takeDateTime,
+          medicineKey: medicineAlaram.key));
     });
   }
 }
@@ -101,7 +103,7 @@ class AfterTakeTile extends StatelessWidget {
       children: [
         Stack(
           children: [
-            _MedicineImageButton(medicineAlaram: medicineAlaram),
+            MedicineImageButton(imagePath: medicineAlaram.imagePath),
             CircleAvatar(
               radius: 40,
               backgroundColor: Colors.green.withOpacity(0.2),
@@ -172,7 +174,8 @@ class AfterTakeTile extends StatelessWidget {
           history: MedicineHistory(
               medicineId: medicineAlaram.id,
               alarmTime: medicineAlaram.alarmTime,
-              takeTime: takeDateTime));
+              takeTime: takeDateTime,
+              medicineKey: medicineAlaram.key));
     });
   }
 }
@@ -196,31 +199,27 @@ class _MoreButton extends StatelessWidget {
   }
 }
 
-class _MedicineImageButton extends StatelessWidget {
-  const _MedicineImageButton({
+class MedicineImageButton extends StatelessWidget {
+  const MedicineImageButton({
     Key? key,
-    required this.medicineAlaram,
+    required this.imagePath,
   }) : super(key: key);
 
-  final MedicineAlarm medicineAlaram;
+  final String? imagePath;
 
   @override
   Widget build(BuildContext context) {
     return CupertinoButton(
       padding: EdgeInsets.zero,
-      onPressed: medicineAlaram.imagePath == null
+      onPressed: imagePath == null
           ? null
           : () {
-              Navigator.push(
-                  context,
-                  FadePageRoute(
-                      page: ImageDetailPage(medicineAlaram: medicineAlaram)));
+              Navigator.push(context,
+                  FadePageRoute(page: ImageDetailPage(imagePath: imagePath!)));
             },
       child: CircleAvatar(
         radius: 40,
-        foregroundImage: medicineAlaram.imagePath == null
-            ? null
-            : FileImage(File(medicineAlaram.imagePath!)),
+        foregroundImage: imagePath == null ? null : FileImage(File(imagePath!)),
       ),
     );
   }
