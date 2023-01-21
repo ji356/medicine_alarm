@@ -89,6 +89,8 @@ class TodayPage extends StatelessWidget {
             alarmTime: '',
             takeTime: DateTime.now(),
             medicineKey: -1,
+            name: '',
+            imagePath: null,
           ),
         );
 

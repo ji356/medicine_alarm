@@ -93,7 +93,7 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
 }
 
 class _MedicineImageButton extends StatefulWidget {
-  const _MedicineImageButton({super.key, required this.changeImageFile});
+  const _MedicineImageButton({required this.changeImageFile});
 
   final ValueChanged<File?> changeImageFile;
 
