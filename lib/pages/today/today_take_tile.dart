@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:drug_alarm/pages/bottomsheet/more_action_bottomsheet.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -201,10 +202,42 @@ class _MoreButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoButton(
       onPressed: () {
-        medicineRepository.deleteMedicine(medicineAlaram.key);
+        showModalBottomSheet(
+            context: context,
+            builder: (context) => MoreActionBottomSheet(
+                  onPressedModify: () {},
+                  onPressedDeleteOnlyMedicine: () {
+                    notification.deleteMultipleAlarm(alarmIds);
+                    medicineRepository.deleteMedicine(medicineAlaram.key);
+                    Navigator.pop(context);
+                  },
+                  onPressedDeleteAll: () {
+                    notification.deleteMultipleAlarm(alarmIds);
+                    historyRepository.deleteAllHistory(keys);
+                    medicineRepository.deleteMedicine(medicineAlaram.key);
+                    Navigator.pop(context);
+                  },
+                ));
       },
       child: const Icon(CupertinoIcons.ellipsis_vertical),
     );
+  }
+
+  List<String> get alarmIds {
+    final medicine = medicineRepository.medicineBox.values
+        .singleWhere((medicine) => medicine.id == medicineAlaram.id);
+    final alarmIds = medicine.alarms
+        .map((alarmStr) => notification.alarmId(medicineAlaram.id, alarmStr))
+        .toList();
+    return alarmIds;
+  }
+
+  Iterable<int> get keys {
+    final histories = historyRepository.historyBox.values.where((history) =>
+        history.medicineId == medicineAlaram.id &&
+        history.medicineKey == medicineAlaram.key);
+
+    return histories.map((e) => e.key as int);
   }
 }
 
