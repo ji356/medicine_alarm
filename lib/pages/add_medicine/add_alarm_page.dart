@@ -12,14 +12,21 @@ import 'package:flutter/material.dart';
 import '../../components/drug_widgets.dart';
 import '../../services/drug_file_service.dart';
 
+// ignore: must_be_immutable
 class AddAlarmPage extends StatelessWidget {
   AddAlarmPage(
-      {super.key, required this.medicineImage, required this.medicineName});
+      {super.key,
+      required this.medicineImage,
+      required this.medicineName,
+      required this.updateMedicineId}) {
+    service = AddMedicineService(updateMedicineId);
+  }
 
+  final int updateMedicineId;
   final File? medicineImage;
   final String medicineName;
 
-  final service = AddMedicineService();
+  late AddMedicineService service;
 
   @override
   Widget build(BuildContext context) {

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:drug_alarm/pages/add_medicine/add_medicine_page.dart';
 import 'package:drug_alarm/pages/bottomsheet/more_action_bottomsheet.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -205,7 +206,14 @@ class _MoreButton extends StatelessWidget {
         showModalBottomSheet(
             context: context,
             builder: (context) => MoreActionBottomSheet(
-                  onPressedModify: () {},
+                  onPressedModify: () {
+                    Navigator.push(
+                        context,
+                        FadePageRoute(
+                          page: AddMedicinePage(
+                              updateMedicineId: medicineAlaram.id),
+                        )).then((_) => Navigator.maybePop(context));
+                  },
                   onPressedDeleteOnlyMedicine: () {
                     notification.deleteMultipleAlarm(alarmIds);
                     medicineRepository.deleteMedicine(medicineAlaram.key);
