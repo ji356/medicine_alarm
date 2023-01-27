@@ -95,7 +95,7 @@ class _TimeTile extends StatelessWidget {
               ),
               const SizedBox(width: smallSpace),
               Text(
-                '${DateFormat('a hh.mm', 'ko').format(history.takeTime)}\n${medicine.name}',
+                '${DateFormat('a hh:mm', 'ko').format(history.takeTime)}\n${medicine.name}',
                 style: Theme.of(context).textTheme.bodyText2!.copyWith(
                       height: 1.6,
                       leadingDistribution: TextLeadingDistribution.even,

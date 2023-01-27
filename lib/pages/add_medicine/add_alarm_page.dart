@@ -50,43 +50,100 @@ class AddAlarmPage extends StatelessWidget {
       ]),
       bottomNavigationBar: BottomSubmitButton(
         onPressed: () async {
-          var result = false;
-
-          for (var alarm in service.alarms) {
-            result = await notification.addNotification(
-              alarmTimeStr: alarm,
-              body: '$alarm 약 먹을 시간이예요!',
-              title: '$medicineName 복약했다고 알려주세요!',
-              medicineId: medicineRepository.newId,
-            );
-
-            if (!result) break;
-          }
-          if (!result) {
-            // ignore: use_build_context_synchronously
-            return showPermissionDenied(context, permission: '알람');
-          }
-
-          String? imageFilePath;
-          if (medicineImage != null) {
-            imageFilePath = await saveImageToLocalDirectory(medicineImage!);
-          }
-
-          final medicine = Medicine(
-              id: medicineRepository.newId,
-              name: medicineName,
-              imagePath: imageFilePath,
-              alarms: service.alarms);
-
-          medicineRepository.addMedicine(medicine);
-
-          // ignore: use_build_context_synchronously
-          Navigator.popUntil(context, (route) => route.isFirst);
+          final isUpdate = updateMedicineId != -1;
+          isUpdate
+              ? await _onUpdateMedicine(context)
+              : await _onAddMedicine(context);
         },
         text: '완료',
       ),
     );
   }
+
+  Future<void> _onAddMedicine(BuildContext context) async {
+    var result = false;
+
+    for (var alarm in service.alarms) {
+      result = await notification.addNotification(
+        alarmTimeStr: alarm,
+        body: '$alarm 약 먹을 시간이예요!',
+        title: '$medicineName 복약했다고 알려주세요!',
+        medicineId: medicineRepository.newId,
+      );
+
+      if (!result) break;
+    }
+    if (!result) {
+      // ignore: use_build_context_synchronously
+      return showPermissionDenied(context, permission: '알람');
+    }
+
+    String? imageFilePath;
+    if (medicineImage != null) {
+      imageFilePath = await saveImageToLocalDirectory(medicineImage!);
+    }
+
+    final medicine = Medicine(
+        id: medicineRepository.newId,
+        name: medicineName,
+        imagePath: imageFilePath,
+        alarms: service.alarms);
+
+    medicineRepository.addMedicine(medicine);
+
+    // ignore: use_build_context_synchronously
+    Navigator.popUntil(context, (route) => route.isFirst);
+  }
+
+  Future<void> _onUpdateMedicine(BuildContext context) async {
+    var result = false;
+
+    final alarmIds = _updateMedicine.alarms
+        .map((alarmTime) => notification.alarmId(updateMedicineId, alarmTime))
+        .toList();
+    await notification.deleteMultipleAlarm(alarmIds);
+
+    for (var alarm in service.alarms) {
+      result = await notification.addNotification(
+        alarmTimeStr: alarm,
+        body: '$alarm 약 먹을 시간이예요!',
+        title: '$medicineName 복약했다고 알려주세요!',
+        medicineId: updateMedicineId,
+      );
+
+      if (!result) break;
+    }
+    if (!result) {
+      // ignore: use_build_context_synchronously
+      return showPermissionDenied(context, permission: '알람');
+    }
+
+    String? imageFilePath = _updateMedicine.imagePath;
+    if (_updateMedicine.imagePath != medicineImage?.path) {
+      if (_updateMedicine.imagePath != null) {
+        deleteImage(_updateMedicine.imagePath!);
+      }
+
+      if (medicineImage != null) {
+        imageFilePath = await saveImageToLocalDirectory(medicineImage!);
+      }
+    }
+
+    final medicine = Medicine(
+        id: _updateMedicine.id,
+        name: medicineName,
+        imagePath: imageFilePath,
+        alarms: service.alarms);
+
+    medicineRepository.updateMedicine(
+        key: _updateMedicine.key, medicine: medicine);
+
+    // ignore: use_build_context_synchronously
+    Navigator.popUntil(context, (route) => route.isFirst);
+  }
+
+  Medicine get _updateMedicine => medicineRepository.medicineBox.values
+      .singleWhere((element) => element.id == updateMedicineId);
 
   List<Widget> get alarmWidgets {
     final children = <Widget>[];
