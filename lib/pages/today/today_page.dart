@@ -1,4 +1,5 @@
 import 'package:drug_alarm/models/medicine_history.dart';
+import 'package:intl/intl.dart';
 
 import '../../components/drug_constants.dart';
 import '../../main.dart';
@@ -47,6 +48,10 @@ class TodayPage extends StatelessWidget {
             medicine.imagePath, alarm, medicine.key));
       }
     }
+
+    medicineAlarms.sort((a, b) => DateFormat('HH:mm')
+        .parse(a.alarmTime)
+        .compareTo(DateFormat('HH:mm').parse(b.alarmTime)));
 
     return Column(
       children: [
